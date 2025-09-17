@@ -1,0 +1,528 @@
+.tab-content-base {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: #ffffff;
+}
+
+.content-header {
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-align: center;
+}
+
+.content-header h2 {
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.content-subtitle {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.content-body {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.feature-card {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  border: 1px solid #e0e0e0;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.feature-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.feature-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.feature-card h3 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.feature-card p {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.info-section, .message-stats, .settings-section, .calculator-section, .tools-info, .about-section, .features-section, .technical-section, .panel-info {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.info-section h3, .message-stats h3, .settings-section h3, .calculator-section h3, .tools-info h3, .about-section h3, .features-section h3, .technical-section h3, .panel-info h3 {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  color: #333;
+  font-weight: 600;
+}
+
+.info-card {
+  background: white;
+  padding: 16px;
+  border-radius: 6px;
+  border-left: 4px solid #1976d2;
+}
+
+.info-card p {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.info-card p:last-child {
+  margin-bottom: 0;
+}
+
+/* 消息列表样式 */
+.message-list h3 {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  color: #333;
+  font-weight: 600;
+}
+
+.message-item {
+  background: white;
+  padding: 16px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  border-left: 4px solid #4caf50;
+}
+
+.message-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.message-from {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.message-time {
+  color: #666;
+  font-size: 12px;
+}
+
+.message-text {
+  color: #333;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* 统计网格 */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 16px;
+}
+
+.stat-item {
+  text-align: center;
+  background: white;
+  padding: 16px;
+  border-radius: 6px;
+}
+
+.stat-number {
+  font-size: 24px;
+  font-weight: bold;
+  color: #1976d2;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #666;
+}
+
+/* 设置项样式 */
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.setting-item:last-child {
+  border-bottom: none;
+}
+
+.setting-item label {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+.setting-input {
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  min-width: 120px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.setting-checkbox {
+  width: 16px;
+  height: 16px;
+}
+
+/* 计算器样式 */
+.calculator {
+  background: #f0f0f0;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.calculator-display {
+  background: #000;
+  color: #0f0;
+  padding: 16px;
+  text-align: right;
+  font-size: 24px;
+  font-family: 'Courier New', monospace;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.calculator-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.calc-btn {
+  padding: 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.calc-btn.number {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.calc-btn.number:hover {
+  background: #d0d0d0;
+}
+
+.calc-btn.operator {
+  background: #ff9800;
+  color: white;
+}
+
+.calc-btn.operator:hover {
+  background: #f57c00;
+}
+
+.calc-btn.equals {
+  background: #4caf50;
+  color: white;
+}
+
+.calc-btn.equals:hover {
+  background: #45a049;
+}
+
+.calc-btn.clear {
+  background: #f44336;
+  color: white;
+}
+
+.calc-btn.clear:hover {
+  background: #da190b;
+}
+
+.calc-btn.zero {
+  grid-column: span 2;
+}
+
+/* 功能列表 */
+.features-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.features-list li {
+  padding: 8px 0;
+  font-size: 14px;
+  color: #333;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.features-list li:last-child {
+  border-bottom: none;
+}
+
+/* 技术栈网格 */
+.tech-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 16px;
+}
+
+.tech-item {
+  text-align: center;
+  background: white;
+  padding: 16px;
+  border-radius: 6px;
+}
+
+.tech-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.tech-name {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+}
+
+/* Android平板适配 */
+@media (min-width: 768px) and (orientation: landscape) {
+  .content-header {
+    padding: 24px;
+  }
+  
+  .content-header h2 {
+    font-size: 28px;
+  }
+  
+  .content-subtitle {
+    font-size: 16px;
+  }
+  
+  .content-body {
+    padding: 24px;
+  }
+  
+  .feature-grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+  }
+  
+  .feature-card {
+    padding: 24px;
+  }
+  
+  .feature-icon {
+    font-size: 36px;
+  }
+  
+  .feature-card h3 {
+    font-size: 18px;
+  }
+  
+  .feature-card p {
+    font-size: 16px;
+  }
+  
+  .info-section, .message-stats, .settings-section, .calculator-section, .tools-info, .about-section, .features-section, .technical-section, .panel-info {
+    padding: 24px;
+  }
+  
+  .info-section h3, .message-stats h3, .settings-section h3, .calculator-section h3, .tools-info h3, .about-section h3, .features-section h3, .technical-section h3, .panel-info h3 {
+    font-size: 20px;
+  }
+  
+  .info-card p {
+    font-size: 16px;
+  }
+  
+  .calculator {
+    max-width: 400px;
+  }
+  
+  .calculator-display {
+    font-size: 32px;
+    padding: 20px;
+  }
+  
+  .calc-btn {
+    padding: 20px;
+    font-size: 20px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .content-header {
+    padding: 28px;
+  }
+  
+  .content-header h2 {
+    font-size: 32px;
+  }
+  
+  .content-subtitle {
+    font-size: 18px;
+  }
+  
+  .content-body {
+    padding: 28px;
+  }
+  
+  .feature-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+  }
+  
+  .feature-card {
+    padding: 28px;
+  }
+  
+  .feature-icon {
+    font-size: 40px;
+  }
+  
+  .feature-card h3 {
+    font-size: 20px;
+  }
+  
+  .feature-card p {
+    font-size: 18px;
+  }
+  
+  .info-section, .message-stats, .settings-section, .calculator-section, .tools-info, .about-section, .features-section, .technical-section, .panel-info {
+    padding: 28px;
+  }
+  
+  .info-section h3, .message-stats h3, .settings-section h3, .calculator-section h3, .tools-info h3, .about-section h3, .features-section h3, .technical-section h3, .panel-info h3 {
+    font-size: 22px;
+  }
+  
+  .info-card p {
+    font-size: 18px;
+  }
+  
+  .calculator {
+    max-width: 500px;
+  }
+  
+  .calculator-display {
+    font-size: 36px;
+    padding: 24px;
+  }
+  
+  .calc-btn {
+    padding: 24px;
+    font-size: 22px;
+  }
+}
+
+/* 小屏幕设备适配 */
+@media (max-width: 767px) {
+  .content-header {
+    padding: 16px;
+  }
+  
+  .content-header h2 {
+    font-size: 20px;
+  }
+  
+  .content-subtitle {
+    font-size: 12px;
+  }
+  
+  .content-body {
+    padding: 16px;
+  }
+  
+  .feature-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .feature-card {
+    padding: 16px;
+  }
+  
+  .feature-icon {
+    font-size: 28px;
+  }
+  
+  .feature-card h3 {
+    font-size: 14px;
+  }
+  
+  .feature-card p {
+    font-size: 12px;
+  }
+  
+  .info-section, .message-stats, .settings-section, .calculator-section, .tools-info, .about-section, .features-section, .technical-section, .panel-info {
+    padding: 16px;
+  }
+  
+  .info-section h3, .message-stats h3, .settings-section h3, .calculator-section h3, .tools-info h3, .about-section h3, .features-section h3, .technical-section h3, .panel-info h3 {
+    font-size: 16px;
+  }
+  
+  .info-card p {
+    font-size: 12px;
+  }
+  
+  .calculator {
+    max-width: 280px;
+  }
+  
+  .calculator-display {
+    font-size: 20px;
+    padding: 12px;
+  }
+  
+  .calc-btn {
+    padding: 12px;
+    font-size: 16px;
+  }
+}
