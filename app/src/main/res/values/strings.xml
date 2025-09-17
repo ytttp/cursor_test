@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">TabletApp</string>
+    <string name="tab_home">首页</string>
+    <string name="tab_work">工作</string>
+    <string name="tab_media">媒体</string>
+    <string name="tab_settings">设置</string>
+    <string name="tab_profile">个人</string>
+    <string name="main_screen">主屏</string>
+    <string name="sub_screen">副屏</string>
+    <string name="send_message">发送消息</string>
+    <string name="message_hint">输入消息内容...</string>
+    <string name="received_message">收到消息: %s</string>
+</resources>
