@@ -1,0 +1,57 @@
+.dual-pane-layout {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  background-color: #ffffff;
+}
+
+.pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: #ffffff;
+}
+
+.left-pane {
+  border-right: 1px solid #e0e0e0;
+}
+
+.right-pane {
+  border-left: 1px solid #e0e0e0;
+}
+
+.pane-divider {
+  width: 1px;
+  background-color: #e0e0e0;
+  flex-shrink: 0;
+}
+
+/* Android平板横屏适配 */
+@media (min-width: 768px) and (orientation: landscape) {
+  .dual-pane-layout {
+    font-size: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dual-pane-layout {
+    font-size: 18px;
+  }
+}
+
+/* 小屏幕设备适配 */
+@media (max-width: 767px) {
+  .dual-pane-layout {
+    font-size: 14px;
+  }
+  
+  /* 在小屏幕上可以切换显示单个面板 */
+  .dual-pane-layout.single-pane .pane:not(.active) {
+    display: none;
+  }
+  
+  .dual-pane-layout.single-pane .pane-divider {
+    display: none;
+  }
+}
