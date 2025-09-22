@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">录音器</string>
+    <string name="start_recording">开始录音</string>
+    <string name="stop_recording">停止录音</string>
+    <string name="play_recording">播放录音</string>
+    <string name="pause_recording">暂停播放</string>
+    <string name="share_recording">分享录音</string>
+    <string name="recording_status">录音状态: %1$s</string>
+    <string name="recording_time">录音时间: %1$s</string>
+    <string name="recording_idle">待机</string>
+    <string name="recording_recording">录音中</string>
+    <string name="recording_playing">播放中</string>
+    <string name="recording_paused">已暂停</string>
+    <string name="permission_required">需要录音权限才能使用此功能</string>
+    <string name="permission_denied">权限被拒绝，无法录音</string>
+    <string name="recording_saved">录音已保存到: %1$s</string>
+    <string name="no_recording_file">没有找到录音文件</string>
+    <string name="recording_error">录音出错: %1$s</string>
+    <string name="share_title">分享录音文件</string>
+    <string name="share_text">分享一个录音文件</string>
+</resources>
