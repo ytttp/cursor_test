@@ -3,13 +3,13 @@ Paginated Launcher (Android)
 
 概述
 ----
-此示例项目实现了一个使用 `RecyclerView` 构建的多页桌面应用图标面板，每页显示 16 个应用图标，并支持跨页拖拽排序以及底部页码指示器。项目基于 Kotlin 和 AndroidX，最低支持到 Android 7.0（API 24）。
+此示例项目实现了一个由 `ViewPager2` + `RecyclerView` 组合构建的多页桌面应用图标面板。每页展示 16 个应用图标，支持跨页拖拽排序，并在底部提供页码指示器。项目基于 Kotlin 和 AndroidX，最低支持到 Android 7.0（API 24）。
 
 主要特性
 --------
-- 水平分页网格：使用 `GridLayoutManager` + `PagerSnapHelper` 构建 4x4 网格页面。
-- 跨页拖拽：利用 `ItemTouchHelper` 支持在网格中任意位置（含不同页之间）拖动图标。
-- 动态页码指示器：显示当前停留的页面并随滚动或拖拽更新。
+- 双层容器：`ViewPager2` 负责翻页，单页内通过 `RecyclerView` + `GridLayoutManager` 渲染 4x4 图标网格。
+- 跨页拖拽：使用 `ItemTouchHelper`，结合边缘感知逻辑，实现从当前页拖动到相邻页并自动切换。
+- 动态页码指示器：显示当前停留的页面并随翻页或拖拽后的跳转更新。
 - 示例数据：内置 48 个“应用”条目，方便直接预览三页效果。
 
 快速开始
@@ -26,12 +26,14 @@ Paginated Launcher (Android)
 
 项目结构
 --------
-- `app/src/main/java/com/example/launcher/MainActivity.kt`：页面入口，负责 RecyclerView、拖拽和指示器逻辑。
-- `AppsAdapter.kt`：图标网格适配器，封装数据交换与视图绑定。
+- `app/src/main/java/com/example/launcher/MainActivity.kt`：应用入口，负责 ViewPager2、指示器和跨页拖拽协调。
+- `LauncherPagerAdapter.kt`：ViewPager2 适配器，为每一页创建 `LauncherPageFragment`。
+- `LauncherPageFragment.kt`：单页容器，内部包含 `RecyclerView` 和拖拽逻辑。
+- `IconGridAdapter.kt`：单页图标网格适配器。
+- `LauncherViewModel.kt`：共享数据源，负责图标列表与跨页移动的统一管理。
 - `AppIconRepository.kt`：提供模拟应用数据。
-- `LauncherPageConfig.kt`：集中管理分页配置。
 - `GridSpacingItemDecoration.kt`：网格边距装饰器。
-- `res/layout/`：包含 `activity_main.xml`、`item_app_icon.xml` 等布局文件。
+- `res/layout/`：包含 `activity_main.xml`、`fragment_launcher_page.xml`、`item_app_icon.xml` 等布局文件。
 - `res/drawable/indicator_dot.xml`：分页指示点样式。
 
 测试建议

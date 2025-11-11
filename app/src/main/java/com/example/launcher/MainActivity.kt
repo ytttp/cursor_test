@@ -2,72 +2,56 @@ package com.example.launcher
 
 import android.os.Bundle
 import android.widget.ImageView
-import androidx.appcompat.app.AppCompatActivity
 import android.widget.LinearLayout
+import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.PagerSnapHelper
-import androidx.recyclerview.widget.RecyclerView
-import com.example.launcher.LauncherPageConfig.PAGE_ROWS
-import com.example.launcher.LauncherPageConfig.PAGE_SIZE
+import androidx.lifecycle.Observer
+import androidx.viewpager2.widget.ViewPager2
 import com.example.launcher.databinding.ActivityMainBinding
-import kotlin.math.ceil
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), LauncherPageFragment.DragAcrossPageListener {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var appsAdapter: AppsAdapter
-    private lateinit var itemTouchHelper: ItemTouchHelper
-    private val pagerSnapHelper = PagerSnapHelper()
+    private val viewModel: LauncherViewModel by viewModels()
+    private lateinit var pagerAdapter: LauncherPagerAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        setupRecyclerView()
-        setupPagerIndicators()
+        setupViewPager()
+        setupIndicators()
     }
 
-    private fun setupRecyclerView() {
-        appsAdapter = AppsAdapter { viewHolder ->
-            itemTouchHelper.startDrag(viewHolder)
-        }
-        appsAdapter.submitItems(AppIconRepository.loadLaunchableApps())
-
-        val gridLayoutManager = GridLayoutManager(
-            this,
-            PAGE_ROWS,
-            RecyclerView.HORIZONTAL,
-            false
-        )
-
-        binding.launcherRecyclerView.apply {
-            layoutManager = gridLayoutManager
-            adapter = appsAdapter
-            setHasFixedSize(true)
-            addItemDecoration(GridSpacingItemDecoration(resources.getDimensionPixelSize(R.dimen.icon_gap)))
-        }
-
-        pagerSnapHelper.attachToRecyclerView(binding.launcherRecyclerView)
-
-        itemTouchHelper = ItemTouchHelper(createDragCallback())
-        itemTouchHelper.attachToRecyclerView(binding.launcherRecyclerView)
-
-        binding.launcherRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                super.onScrollStateChanged(recyclerView, newState)
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    updateIndicatorForVisiblePage()
+    private fun setupViewPager() {
+        pagerAdapter = LauncherPagerAdapter(this, viewModel)
+        binding.launcherViewPager.apply {
+            adapter = pagerAdapter
+            offscreenPageLimit = 1
+            registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    super.onPageSelected(position)
+                    highlightIndicator(position)
                 }
+            })
+        }
+
+        viewModel.icons.observe(this, Observer {
+            pagerAdapter.notifyDataSetChanged()
+            val pageCount = viewModel.pageCount()
+            updateIndicatorDots(pageCount)
+            val clamped = binding.launcherViewPager.currentItem.coerceIn(0, pageCount - 1)
+            if (clamped != binding.launcherViewPager.currentItem) {
+                binding.launcherViewPager.setCurrentItem(clamped, false)
             }
+            highlightIndicator(clamped)
         })
     }
 
-    private fun setupPagerIndicators() {
-        val pages = ceil(appsAdapter.itemCount / PAGE_SIZE.toDouble()).toInt().coerceAtLeast(1)
-        updateIndicatorDots(pages)
+    private fun setupIndicators() {
+        updateIndicatorDots(viewModel.pageCount())
         highlightIndicator(0)
     }
 
@@ -92,9 +76,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun highlightIndicator(pageIndex: Int) {
+        if (binding.pageIndicatorContainer.childCount == 0) return
+        val safeIndex = pageIndex.coerceIn(0, binding.pageIndicatorContainer.childCount - 1)
         for (i in 0 until binding.pageIndicatorContainer.childCount) {
             val view = binding.pageIndicatorContainer.getChildAt(i)
-            val active = i == pageIndex
+            val active = i == safeIndex
             val tintColor = if (active) {
                 ContextCompat.getColor(this, R.color.indicator_active)
             } else {
@@ -109,55 +95,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun createDragCallback(): ItemTouchHelper.Callback {
-        return object : ItemTouchHelper.SimpleCallback(
-            ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT,
-            0
-        ) {
-            override fun onMove(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder,
-                target: RecyclerView.ViewHolder
-            ): Boolean {
-                val from = viewHolder.bindingAdapterPosition
-                val to = target.bindingAdapterPosition
-                val moved = appsAdapter.moveItem(from, to)
-                if (moved) {
-                    recyclerView.post { updateIndicatorForVisiblePage() }
-                }
-                return moved
-            }
-
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                // No swipe actions supported.
-            }
-
-            override fun isLongPressDragEnabled(): Boolean = false
-
-            override fun canDropOver(
-                recyclerView: RecyclerView,
-                current: RecyclerView.ViewHolder,
-                target: RecyclerView.ViewHolder
-            ): Boolean {
-                return true
-            }
-
-            override fun getMovementFlags(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder
-            ): Int {
-                val dragFlags = ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
-                return makeMovementFlags(dragFlags, 0)
-            }
-        }
+    override fun onDragTowardPage(targetPage: Int) {
+        binding.launcherViewPager.setCurrentItem(targetPage, true)
     }
 
-    private fun updateIndicatorForVisiblePage() {
-        val layoutManager = binding.launcherRecyclerView.layoutManager as? GridLayoutManager ?: return
-        val snapView = pagerSnapHelper.findSnapView(layoutManager) ?: return
-        val position = binding.launcherRecyclerView.getChildAdapterPosition(snapView)
-        if (position == RecyclerView.NO_POSITION) return
-        val pageIndex = position / PAGE_SIZE
-        highlightIndicator(pageIndex)
+    override fun onDragReleasedToPage(targetPage: Int) {
+        binding.launcherViewPager.setCurrentItem(targetPage, false)
+        highlightIndicator(targetPage)
     }
 }

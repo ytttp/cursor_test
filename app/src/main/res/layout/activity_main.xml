@@ -6,8 +6,8 @@
     android:layout_height="match_parent"
     android:background="@color/canvas_background">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/launcherRecyclerView"
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/launcherViewPager"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:clipToPadding="false"
