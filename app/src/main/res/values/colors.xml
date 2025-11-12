@@ -1,0 +1,15 @@
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="indicator_active">#FFFFFFFF</color>
+    <color name="indicator_inactive">#66FFFFFF</color>
+    <color name="canvas_background">#FF10131A</color>
+    <color name="icon_background_1">#FF5E60CE</color>
+    <color name="icon_background_2">#FF4CC9F0</color>
+    <color name="icon_background_3">#FF4895EF</color>
+    <color name="icon_background_4">#FF560BAD</color>
+    <color name="icon_background_5">#FF4361EE</color>
+    <color name="icon_background_6">#FF3A0CA3</color>
+    <color name="icon_background_7">#FF7209B7</color>
+    <color name="icon_background_8">#FFF72585</color>
+</resources>
