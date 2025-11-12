@@ -8,7 +8,7 @@ Paginated Launcher (Android)
 主要特性
 --------
 - 双层容器：`ViewPager2` 负责翻页，单页内通过 `RecyclerView` + `GridLayoutManager` 渲染 4x4 图标网格。
-- 跨页拖拽：使用 `ItemTouchHelper`，结合边缘感知逻辑，实现从当前页拖动到相邻页并自动切换。
+- 跨页拖拽：依托系统 `startDragAndDrop` 全局拖拽机制，支持在页边缘自动切换 `ViewPager2` 并将图标插入目标页。
 - 动态页码指示器：显示当前停留的页面并随翻页或拖拽后的跳转更新。
 - 示例数据：内置 48 个“应用”条目，方便直接预览三页效果。
 

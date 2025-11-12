@@ -1,15 +1,18 @@
 package com.example.launcher
 
+import android.content.ClipData
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.launcher.databinding.ItemAppIconBinding
 
 class IconGridAdapter(
-    private val onLongPress: (RecyclerView.ViewHolder) -> Unit
+    private val pageIndex: Int
 ) : RecyclerView.Adapter<IconGridAdapter.IconViewHolder>() {
 
     private val icons: MutableList<AppIcon> = mutableListOf()
+    private var draggingItemId: Long? = null
 
     init {
         setHasStableIds(true)
@@ -21,36 +24,27 @@ class IconGridAdapter(
         notifyDataSetChanged()
     }
 
-    fun swap(fromPosition: Int, toPosition: Int): Boolean {
-        if (fromPosition == toPosition) return false
-        if (fromPosition !in icons.indices || toPosition !in icons.indices) return false
-        if (fromPosition < toPosition) {
-            for (i in fromPosition until toPosition) {
-                java.util.Collections.swap(icons, i, i + 1)
-            }
-        } else {
-            for (i in fromPosition downTo toPosition + 1) {
-                java.util.Collections.swap(icons, i, i - 1)
-            }
-        }
-        notifyItemMoved(fromPosition, toPosition)
-        return true
+    fun onDragStarted(itemId: Long) {
+        draggingItemId = itemId
+        notifyDataSetChanged()
     }
 
-    fun getIcon(position: Int): AppIcon? = icons.getOrNull(position)
+    fun onDragEnded() {
+        draggingItemId = null
+        notifyDataSetChanged()
+    }
+
+    fun iconCount(): Int = icons.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): IconViewHolder {
         val binding = ItemAppIconBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        val holder = IconViewHolder(binding)
-        binding.iconCard.setOnLongClickListener {
-            onLongPress(holder)
-            true
-        }
-        return holder
+        return IconViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: IconViewHolder, position: Int) {
-        holder.bind(icons[position])
+        val icon = icons[position]
+        holder.bind(icon)
+        holder.setDragState(icon.id == draggingItemId)
     }
 
     override fun getItemCount(): Int = icons.size
@@ -61,10 +55,44 @@ class IconGridAdapter(
         private val binding: ItemAppIconBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
+        init {
+            binding.iconCard.setOnLongClickListener { view ->
+                val position = bindingAdapterPosition
+                if (position == RecyclerView.NO_POSITION) return@setOnLongClickListener false
+                val icon = icons.getOrNull(position) ?: return@setOnLongClickListener false
+                val payload = DragPayload(
+                    icon = icon,
+                    fromPage = pageIndex,
+                    fromPosition = position
+                )
+                val clipData = ClipData.newPlainText(CLIP_LABEL, icon.id.toString())
+                val shadow = View.DragShadowBuilder(view)
+                val started = view.startDragAndDrop(
+                    clipData,
+                    shadow,
+                    payload,
+                    View.DRAG_FLAG_GLOBAL
+                )
+                if (started) {
+                    onDragStarted(icon.id)
+                }
+                started
+            }
+        }
+
         fun bind(icon: AppIcon) = with(binding) {
             appIcon.setImageResource(icon.iconRes)
             appLabel.text = icon.label
             iconCard.setCardBackgroundColor(root.context.getColor(icon.backgroundColorRes))
         }
+
+        fun setDragState(isDragging: Boolean) {
+            val alpha = if (isDragging) 0.3f else 1f
+            binding.root.alpha = alpha
+        }
+    }
+
+    companion object {
+        private const val CLIP_LABEL = "app_icon_drag"
     }
 }

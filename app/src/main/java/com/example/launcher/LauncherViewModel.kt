@@ -21,45 +21,30 @@ class LauncherViewModel : ViewModel() {
         return if (fromIndex < toIndex) current.subList(fromIndex, toIndex) else emptyList()
     }
 
-    fun moveWithinPage(pageIndex: Int, fromPosition: Int, toPosition: Int) {
-        val current = _icons.value?.toMutableList() ?: return
-        val from = pageIndex * LauncherPageConfig.PAGE_SIZE + fromPosition
-        val to = pageIndex * LauncherPageConfig.PAGE_SIZE + toPosition
-        if (from !in current.indices || to !in current.indices) return
-        val item = current.removeAt(from)
-        val adjustedTo = when {
-            from < to -> (to - 1).coerceAtMost(current.size)
-            from > to -> to.coerceAtLeast(0)
-            else -> to
-        }
-        val insertIndex = adjustedTo.coerceIn(0, current.size)
-        current.add(insertIndex, item)
-        _icons.value = current
-    }
-
-    fun moveToPage(
+    fun moveIcon(
         fromPage: Int,
         fromPosition: Int,
         targetPage: Int,
-        insertAtStart: Boolean
+        targetPositionInPage: Int
     ) {
         val current = _icons.value?.toMutableList() ?: return
-        val from = fromPage * LauncherPageConfig.PAGE_SIZE + fromPosition
-        if (from !in current.indices) return
-        val item = current.removeAt(from)
+        if (current.isEmpty()) return
 
-        val targetStart = (targetPage * LauncherPageConfig.PAGE_SIZE).coerceAtMost(current.size)
-        val itemsRemaining = (current.size - targetStart).coerceAtLeast(0)
-        val targetCount = itemsRemaining.coerceAtMost(LauncherPageConfig.PAGE_SIZE)
+        val pageSize = LauncherPageConfig.PAGE_SIZE
+        val totalSize = current.size
+        val fromIndex = (fromPage * pageSize + fromPosition).coerceIn(0, totalSize - 1)
+        val targetIndexBeforeRemoval = (targetPage * pageSize + targetPositionInPage).coerceIn(0, totalSize)
 
-        val insertionIndex = if (insertAtStart || targetCount == 0) {
-            targetStart
-        } else {
-            (targetStart + targetCount - 1).coerceIn(targetStart, current.size)
+        val item = current.removeAt(fromIndex)
+
+        var adjustedTargetIndex = targetIndexBeforeRemoval
+        if (fromIndex < targetIndexBeforeRemoval) {
+            adjustedTargetIndex--
         }
+        if (adjustedTargetIndex < 0) adjustedTargetIndex = 0
+        if (adjustedTargetIndex > current.size) adjustedTargetIndex = current.size
 
-        val index = insertionIndex.coerceIn(0, current.size)
-        current.add(index, item)
+        current.add(adjustedTargetIndex, item)
         _icons.value = current
     }
 }

@@ -3,10 +3,10 @@ package com.example.launcher
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.view.DragEvent
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.launcher.databinding.FragmentLauncherPageBinding
 
@@ -26,10 +26,7 @@ class LauncherPageFragment : Fragment(R.layout.fragment_launcher_page) {
     private val viewModel: LauncherViewModel by activityViewModels()
 
     private lateinit var adapter: IconGridAdapter
-    private var itemTouchHelper: ItemTouchHelper? = null
-
     private var pendingTargetPage: Int? = null
-    private var dragStartPosition: Int = RecyclerView.NO_POSITION
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -46,9 +43,7 @@ class LauncherPageFragment : Fragment(R.layout.fragment_launcher_page) {
         val binding = FragmentLauncherPageBinding.bind(view)
         this.binding = binding
 
-        adapter = IconGridAdapter { holder ->
-            itemTouchHelper?.startDrag(holder)
-        }
+        adapter = IconGridAdapter(pageIndex = argsPageIndex)
 
         binding.iconRecyclerView.apply {
             layoutManager = GridLayoutManager(context, LauncherPageConfig.PAGE_COLUMNS)
@@ -56,120 +51,96 @@ class LauncherPageFragment : Fragment(R.layout.fragment_launcher_page) {
             if (itemDecorationCount == 0) {
                 addItemDecoration(GridSpacingItemDecoration(resources.getDimensionPixelSize(R.dimen.icon_gap)))
             }
+            setOnDragListener(dragListener)
         }
-
-        setupTouchHelper(binding.iconRecyclerView)
 
         viewModel.icons.observe(viewLifecycleOwner) {
             adapter.submitIcons(viewModel.pageItems(argsPageIndex))
         }
+
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        binding?.iconRecyclerView?.setOnDragListener(null)
         binding = null
     }
 
-    private fun setupTouchHelper(recyclerView: RecyclerView) {
-        val callback = object : ItemTouchHelper.SimpleCallback(
-            ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT,
-            0
-        ) {
-            override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
-                super.onSelectedChanged(viewHolder, actionState)
-                if (actionState == ItemTouchHelper.ACTION_STATE_DRAG && viewHolder != null) {
-                    dragStartPosition = viewHolder.bindingAdapterPosition
-                    pendingTargetPage = null
-                } else if (actionState == ItemTouchHelper.ACTION_STATE_IDLE) {
-                    dragStartPosition = RecyclerView.NO_POSITION
-                    pendingTargetPage = null
+    private val dragListener = View.OnDragListener { _, event ->
+        val payload = event.localState as? DragPayload ?: return@OnDragListener false
+        when (event.action) {
+            DragEvent.ACTION_DRAG_STARTED -> {
+                if (payload.fromPage == argsPageIndex) {
+                    adapter.onDragStarted(payload.icon.id)
                 }
+                true
             }
 
-            override fun onMove(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder,
-                target: RecyclerView.ViewHolder
-            ): Boolean {
-                val fromPosition = viewHolder.bindingAdapterPosition
-                val toPosition = target.bindingAdapterPosition
-                if (fromPosition == RecyclerView.NO_POSITION || toPosition == RecyclerView.NO_POSITION) {
-                    return false
-                }
-                val swapped = adapter.swap(fromPosition, toPosition)
-                if (swapped) {
-                    viewModel.moveWithinPage(argsPageIndex, fromPosition, toPosition)
-                }
-                return swapped
+            DragEvent.ACTION_DRAG_LOCATION -> {
+                handleEdgeAutoScroll(event)
+                true
             }
 
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                // No swipe support.
+            DragEvent.ACTION_DROP -> {
+                handleDrop(payload, event)
+                true
             }
 
-            override fun isLongPressDragEnabled(): Boolean = false
-
-            override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
-                super.clearView(recyclerView, viewHolder)
-                pendingTargetPage?.let { target ->
-                    if (target != argsPageIndex) {
-                        if (dragStartPosition != RecyclerView.NO_POSITION) {
-                            viewModel.moveToPage(
-                                fromPage = argsPageIndex,
-                                fromPosition = dragStartPosition.coerceAtLeast(0),
-                                targetPage = target,
-                                insertAtStart = target > argsPageIndex
-                            )
-                            dragAcrossPageListener?.onDragReleasedToPage(target)
-                        }
-                        dragStartPosition = RecyclerView.NO_POSITION
-                    }
-                }
+            DragEvent.ACTION_DRAG_ENDED -> {
+                adapter.onDragEnded()
                 pendingTargetPage = null
-                dragStartPosition = RecyclerView.NO_POSITION
+                true
             }
 
-            override fun onChildDraw(
-                c: android.graphics.Canvas,
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder,
-                dX: Float,
-                dY: Float,
-                actionState: Int,
-                isCurrentlyActive: Boolean
-            ) {
-                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
-                if (actionState != ItemTouchHelper.ACTION_STATE_DRAG || !isCurrentlyActive) return
-                handleEdgeDragging(recyclerView, dX, viewHolder)
-            }
+            else -> true
         }
-
-        itemTouchHelper = ItemTouchHelper(callback).also { it.attachToRecyclerView(recyclerView) }
     }
 
-    private fun handleEdgeDragging(recyclerView: RecyclerView, dX: Float, viewHolder: RecyclerView.ViewHolder) {
+    private fun handleDrop(payload: DragPayload, event: DragEvent) {
+        val recyclerView = binding?.iconRecyclerView ?: return
+        val targetPosition = calculateTargetPosition(recyclerView, event.x, event.y)
+        viewModel.moveIcon(
+            fromPage = payload.fromPage,
+            fromPosition = payload.fromPosition,
+            targetPage = argsPageIndex,
+            targetPositionInPage = targetPosition
+        )
+        dragAcrossPageListener?.onDragReleasedToPage(argsPageIndex)
+    }
+
+    private fun calculateTargetPosition(recyclerView: RecyclerView, x: Float, y: Float): Int {
+        val child = recyclerView.findChildViewUnder(x, y)
+        return when {
+            child != null -> recyclerView.getChildAdapterPosition(child).coerceAtLeast(0)
+            y < 0 -> 0
+            else -> adapter.iconCount()
+        }.coerceIn(0, LauncherPageConfig.PAGE_SIZE)
+    }
+
+    private fun handleEdgeAutoScroll(event: DragEvent) {
+        val recyclerView = binding?.iconRecyclerView ?: return
         val width = recyclerView.width
         if (width == 0) return
 
-        val view = viewHolder.itemView
-        val draggedCenter = view.left + view.width / 2f + dX
         val threshold = width * EDGE_ACTIVATION_RATIO
-        val effectivePage = pendingTargetPage ?: argsPageIndex
-        val lastPageIndex = viewModel.pageCount() - 1
+        val x = event.x
+        val totalPages = viewModel.pageCount()
 
-        val newTarget = when {
-            draggedCenter > width - threshold && effectivePage < lastPageIndex ->
-                effectivePage + 1
-            draggedCenter < threshold && effectivePage > 0 ->
-                effectivePage - 1
+        val requestedPage = when {
+            x > width - threshold && argsPageIndex < totalPages - 1 -> argsPageIndex + 1
+            x < threshold && argsPageIndex > 0 -> argsPageIndex - 1
             else -> null
         }
 
-        if (newTarget != pendingTargetPage) {
-            pendingTargetPage = newTarget
-            if (newTarget != null) {
-                dragAcrossPageListener?.onDragTowardPage(newTarget)
+        if (requestedPage != pendingTargetPage) {
+            pendingTargetPage = requestedPage
+            if (requestedPage != null) {
+                dragAcrossPageListener?.onDragTowardPage(requestedPage)
             }
+        }
+
+        if (requestedPage == null) {
+            pendingTargetPage = null
         }
     }
 

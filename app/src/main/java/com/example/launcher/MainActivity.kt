@@ -96,7 +96,7 @@ class MainActivity : AppCompatActivity(), LauncherPageFragment.DragAcrossPageLis
     }
 
     override fun onDragTowardPage(targetPage: Int) {
-        binding.launcherViewPager.setCurrentItem(targetPage, true)
+        binding.launcherViewPager.setCurrentItem(targetPage, false)
     }
 
     override fun onDragReleasedToPage(targetPage: Int) {
